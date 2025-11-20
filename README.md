@@ -1,4 +1,8 @@
-# ChangeDINO Quick Guide
+# ChangeDINO
+Arch.
+<center><img src="./demo/ChangeDINO.png" width=1080 alt="ChangeDINO"></center>
+
+# Quick Guide
 
 ## Setup
 Recommended: Python 3.10, PyTorch 2.4.0 (CUDA 11.8)
