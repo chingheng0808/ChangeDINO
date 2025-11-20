@@ -1,5 +1,4 @@
-[[paper]](https://arxiv.org/pdf/2411.15922)
-# ChangeDINO
+# ChangeDINO [[paper]](https://arxiv.org/pdf/2411.15922)
 Arch.
 <center><img src="./demo/ChangeDINO.png" width=1080 alt="ChangeDINO"></center>
 
