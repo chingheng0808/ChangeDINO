@@ -1,4 +1,8 @@
 # ChangeDINO [[paper]](https://arxiv.org/pdf/2411.15922)
+[Ching-Heng Cheng](https://scholar.google.com/citations?user=2UmoEfcAAAAJ&hl=zh-TW), [Chih-Chung Hsu](https://cchsu.info/wordpress/)
+
+This is a PyTorch implementation for "ChangeDINO: DINOv3-Driven Building Change Detection in Optical Remote Sensing Imagery." This document summarizes the environment requirements, dataset layout, and common commands you need to run the project.
+
 Arch.
 <center><img src="./demo/ChangeDINO.png" width=1080 alt="ChangeDINO"></center>
 
