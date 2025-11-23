@@ -43,6 +43,14 @@ Expect the data structure:
         ├── B/
         └── label/
 ```
+
+## Pre-trained Weights (Google Drive)
+For the DINOv3 pre-trained weight, please [download here](https://drive.google.com/file/d/1r6g0D6zV-1e8gJHij1edsE_uzvZ72L3u/view?usp=drive_link) and place it under `dinov3/weights/`.
+
+For the checkpoints from our training, which can be obtained from the following links:
+
++ [LEVIR-CD](https://drive.google.com/file/d/1slYOZBmChzP7N7776ODGL4PB807xPr9d/view?usp=sharing)
+
 ## Train / Validate
 ```bash
 cd dinov3/ChangeDINO
