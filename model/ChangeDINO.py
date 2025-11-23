@@ -274,7 +274,7 @@ class ChangeModel(nn.Module):
         pred = self.refiner(pred)
         return pred
 
-    def forward(self, x1, x2, label=None):
+    def forward(self, x1, x2):
         # for training
         ## change detection
         fea1 = self.encoder(x1)
