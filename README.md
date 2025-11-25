@@ -52,6 +52,7 @@ For the full ChangeDINO's pre-trained weights, which can be obtained from the fo
 + [LEVIR-CD](https://drive.google.com/file/d/1slYOZBmChzP7N7776ODGL4PB807xPr9d/view?usp=sharing)
 + [WHU-CD](https://drive.google.com/file/d/1vVaALwCoYrnDyoCXhH989sKkSRD_rRT2/view?usp=sharing)
 + [SYSU-CD](https://drive.google.com/file/d/12rD8gHNvkIfE8Wr6LdYoaWDNGT7zfSG7/view?usp=sharing)
++ [S2Looking](https://drive.google.com/file/d/1HzNkAdS8zPks5KLAr0yLYRrzqWlbC45w/view?usp=sharing)
 
 ## Train / Validate
 ```bash
