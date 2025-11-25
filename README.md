@@ -50,6 +50,7 @@ For the DINOv3 pre-trained weight, please [download here](https://drive.google.c
 For the full ChangeDINO's pre-trained weights, which can be obtained from the following links:
 
 + [LEVIR-CD](https://drive.google.com/file/d/1slYOZBmChzP7N7776ODGL4PB807xPr9d/view?usp=sharing)
++ [WHU-CD](https://drive.google.com/file/d/1vVaALwCoYrnDyoCXhH989sKkSRD_rRT2/view?usp=sharing)
 + [SYSU-CD](https://drive.google.com/file/d/12rD8gHNvkIfE8Wr6LdYoaWDNGT7zfSG7/view?usp=sharing)
 
 ## Train / Validate
