@@ -11,7 +11,6 @@ from .blocks.refine import LearnableSoftMorph
 from .backbone.mobilenetv2 import mobilenet_v2
 
 
-
 def get_backbone(backbone_name):
     if backbone_name == "mobilenetv2":
         backbone = mobilenet_v2(pretrained=True, progress=True)
@@ -99,7 +98,9 @@ class Encoder(nn.Module):
             beta_mode=beta_mode,
         )
         dense_out_dim = fpn_channels * 2
-        self.dino = DINOV3Wrapper(weights_path=dino_weight, device=device, extract_ids=extract_ids)
+        self.dino = DINOV3Wrapper(
+            weights_path=dino_weight, device=device, extract_ids=extract_ids
+        )
         self.dense_adp = DenseAdapterLite(
             in_dim=1024, out_dim=dense_out_dim, bottleneck=fpn_channels // 2
         )
@@ -119,7 +120,7 @@ class Encoder(nn.Module):
         fea = self.backbone.forward(x)
         fea = self.fpn(fea[-4:])  # t1_p1, t1_p2, t1_p3, t1_p4
 
-        ds_fea = self.dino(x)  # [B, N, C]
+        ds_fea = self.dino(x)
 
         # process dense features
         ds_fea = self.dense_adp(ds_fea)
@@ -132,10 +133,7 @@ class Encoder(nn.Module):
 class FuseGated(nn.Module):
     def __init__(self, dim):
         super().__init__()
-        self.gate = nn.Sequential(
-            nn.Conv2d(2*dim, dim, 1, bias=True), 
-            nn.Sigmoid()
-        )
+        self.gate = nn.Sequential(nn.Conv2d(2 * dim, dim, 1, bias=True), nn.Sigmoid())
         self.mix = nn.Sequential(
             nn.Conv2d(dim, dim, 3, padding=1, bias=False),
             nn.BatchNorm2d(dim),
@@ -153,7 +151,7 @@ class Detector(nn.Module):
     def __init__(
         self,
         fpn_channels=128,
-        n_layers=[1, 1 ,1, 1],
+        n_layers=[1, 1, 1, 1],
         **kwargs,
     ):
         super().__init__()
@@ -162,65 +160,75 @@ class Detector(nn.Module):
         self.p3_to_p2 = FuseGated(fpn_channels)
 
         self.tb5 = nn.Sequential(
-            *[TransformerBlock(
-                dim=fpn_channels,
-                spatial_attn_type="CDA",
-                num_channel_heads=8,
-                num_spatial_heads=4,
-                depth=3,
-                ffn_expansion_factor=2,
-                bias=False,
-                LayerNorm_type="BiasFree",) 
-            for _ in range(n_layers[0])]
-        ) 
+            *[
+                TransformerBlock(
+                    dim=fpn_channels,
+                    spatial_attn_type="CDA",
+                    num_channel_heads=8,
+                    num_spatial_heads=4,
+                    depth=3,
+                    ffn_expansion_factor=2,
+                    bias=False,
+                    LayerNorm_type="BiasFree",
+                )
+                for _ in range(n_layers[0])
+            ]
+        )
         self.tb4 = nn.Sequential(
-            *[TransformerBlock(
-                dim=fpn_channels,
-                spatial_attn_type="CDA",
-                num_channel_heads=8,
-                num_spatial_heads=4,
-                depth=3,
-                ffn_expansion_factor=2,
-                bias=False,
-                LayerNorm_type="BiasFree",) 
-            for _ in range(n_layers[1])]
-        ) 
+            *[
+                TransformerBlock(
+                    dim=fpn_channels,
+                    spatial_attn_type="CDA",
+                    num_channel_heads=8,
+                    num_spatial_heads=4,
+                    depth=3,
+                    ffn_expansion_factor=2,
+                    bias=False,
+                    LayerNorm_type="BiasFree",
+                )
+                for _ in range(n_layers[1])
+            ]
+        )
         self.tb3 = nn.Sequential(
-            *[TransformerBlock(
-                dim=fpn_channels,
-                spatial_attn_type="OCDA",
-                window_size=8,
-                overlap_ratio=0.5,
-                num_channel_heads=8,
-                num_spatial_heads=4,
-                depth=2,
-                ffn_expansion_factor=2,
-                bias=False,
-                LayerNorm_type="BiasFree",
-            ) 
-            for _ in range(n_layers[2])]
+            *[
+                TransformerBlock(
+                    dim=fpn_channels,
+                    spatial_attn_type="OCDA",
+                    window_size=8,
+                    overlap_ratio=0.5,
+                    num_channel_heads=8,
+                    num_spatial_heads=4,
+                    depth=2,
+                    ffn_expansion_factor=2,
+                    bias=False,
+                    LayerNorm_type="BiasFree",
+                )
+                for _ in range(n_layers[2])
+            ]
         )
         self.tb2 = nn.Sequential(
-            *[TransformerBlock(
-                dim=fpn_channels,
-                spatial_attn_type="OCDA",
-                window_size=8,
-                overlap_ratio=0.5,
-                num_channel_heads=8,
-                num_spatial_heads=4,
-                depth=1,
-                ffn_expansion_factor=2,
-                bias=False,
-                LayerNorm_type="BiasFree",
-            ) 
-            for _ in range(n_layers[3])]
+            *[
+                TransformerBlock(
+                    dim=fpn_channels,
+                    spatial_attn_type="OCDA",
+                    window_size=8,
+                    overlap_ratio=0.5,
+                    num_channel_heads=8,
+                    num_spatial_heads=4,
+                    depth=1,
+                    ffn_expansion_factor=2,
+                    bias=False,
+                    LayerNorm_type="BiasFree",
+                )
+                for _ in range(n_layers[3])
+            ]
         )
         self.p5_head = nn.Conv2d(fpn_channels, 2, 1)
         self.p4_head = nn.Conv2d(fpn_channels, 2, 1)
         self.p3_head = nn.Conv2d(fpn_channels, 2, 1)
         self.p2_head = nn.Conv2d(fpn_channels, 2, 1)
 
-    def forward(self, x1s, x2s):
+    def forward(self, x1s, x2s, size=(256, 256)):
         ### Extract backbone features
         t1_p2, t1_p3, t1_p4, t1_p5 = x1s
         t2_p2, t2_p3, t2_p4, t2_p5 = x2s
@@ -243,26 +251,28 @@ class Detector(nn.Module):
         pred_p2 = self.p2_head(fea_p2)
 
         pred_p2 = F.interpolate(
-            pred_p2, size=(256, 256), mode="bilinear", align_corners=False
+            pred_p2, size=size, mode="bilinear", align_corners=False
         )
         pred_p3 = F.interpolate(
-            pred_p3, size=(256, 256), mode="bilinear", align_corners=False
+            pred_p3, size=size, mode="bilinear", align_corners=False
         )
         pred_p4 = F.interpolate(
-            pred_p4, size=(256, 256), mode="bilinear", align_corners=False
+            pred_p4, size=size, mode="bilinear", align_corners=False
         )
         pred_p5 = F.interpolate(
-            pred_p5, size=(256, 256), mode="bilinear", align_corners=False
+            pred_p5, size=size, mode="bilinear", align_corners=False
         )
 
         return pred_p2, pred_p3, pred_p4, pred_p5
 
 
 class ChangeModel(nn.Module):
-    def __init__(self, backbone="mobilenetv2", fpn_channels=128, n_layers=[1, 1, 1, 1], **kwargs):
+    def __init__(
+        self, backbone="mobilenetv2", fpn_channels=128, n_layers=[1, 1, 1, 1], **kwargs
+    ):
         super().__init__()
         self.encoder = Encoder(backbone=backbone, fpn_channels=fpn_channels, **kwargs)
-        self.detector = Detector(fpn_channels=fpn_channels, n_layers=n_layers,**kwargs)
+        self.detector = Detector(fpn_channels=fpn_channels, n_layers=n_layers, **kwargs)
         self.refiner = LearnableSoftMorph(3, 5)
 
     @torch.inference_mode()
@@ -270,7 +280,7 @@ class ChangeModel(nn.Module):
         # for inference
         fea1 = self.encoder(x1)
         fea2 = self.encoder(x2)
-        pred, _, _, _ = self.detector(fea1, fea2)
+        pred, _, _, _ = self.detector(fea1, fea2, x1.shape[-2:])
         pred = self.refiner(pred)
         return pred
 
@@ -279,7 +289,7 @@ class ChangeModel(nn.Module):
         ## change detection
         fea1 = self.encoder(x1)
         fea2 = self.encoder(x2)
-        
+
         preds = self.detector(fea1, fea2)
         final_pred = self.refiner(preds[0])
         return final_pred, preds  # pred, pred_p2, pred_p3, pred_p4, pred_p5
