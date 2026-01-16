@@ -42,6 +42,7 @@ class DINOV3Wrapper(nn.Module):
             p.requires_grad = False
 
     def forward(self, x):
+        scale_factor = 2 / (512 / x.shape[-1])
         x = F.interpolate(
             x, size=(512, 512), mode="bilinear", align_corners=True, antialias=True
         )
@@ -52,7 +53,13 @@ class DINOV3Wrapper(nn.Module):
                 )
                 feats_ = []
                 for i in range(len(self.extract_ids)):
-                    feats_.append(feats[self.extract_ids[i]])  # [B, N, C]
+                    feats_.append(
+                        F.interpolate(
+                            feats[self.extract_ids[i]],
+                            scale_factor=scale_factor,
+                            mode="bilinear",
+                        )
+                    )
         return feats_
 
 
@@ -85,19 +92,17 @@ class DenseAdapterLite(nn.Module):
         self,
         in_dim=1024,
         out_dim=256,
-        sizes=(64, 32, 16, 8),
         bottleneck=64,
         share=False,
     ):
         super().__init__()
-        self.sizes = list(sizes)
         if share:
             self.blocks = nn.ModuleList(
                 [SepAdapterBlock(in_dim, out_dim, r=bottleneck)]
             )
         else:
             self.blocks = nn.ModuleList(
-                [SepAdapterBlock(in_dim, out_dim, r=bottleneck) for _ in self.sizes]
+                [SepAdapterBlock(in_dim, out_dim, r=bottleneck) for _ in range(4)]
             )
         self.share = share
 
@@ -110,7 +115,7 @@ class DenseAdapterLite(nn.Module):
         for i, x in enumerate(feats):
             x = F.interpolate(
                 x,
-                size=(self.sizes[i], self.sizes[i]),
+                scale_factor=2 / (2**i),
                 mode="bilinear",
                 align_corners=False,
                 antialias=True,
